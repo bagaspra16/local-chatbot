@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Configuration
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+UI_PATH="$SCRIPT_DIR/ui/index.html"
+
+case "$1" in
+  on)
+    echo "🚀 Starting Chatbot Services..."
+    docker compose up -d --build
+    ;;
+  off)
+    echo "🛑 Stopping Chatbot Services..."
+    docker compose down
+    ;;
+  restart)
+    echo "🔄 Restarting Chatbot Services..."
+    docker compose restart
+    ;;
+  status)
+    docker compose ps
+    ;;
+  setup)
+    echo "📥 Pulling Llama 3.2 model..."
+    docker exec -it ollama ollama pull llama3.2
+    echo "✅ Setup complete."
+    ;;
+  logs)
+    docker compose logs -f
+    ;;
+  ui)
+    echo "🌐 Opening UI in browser..."
+    open "$UI_PATH"
+    ;;
+  *)
+    echo "Usage: chatbot [command]"
+    echo ""
+    echo "Commands:"
+    echo "  on       Start all services"
+    echo "  off      Stop and remove containers"
+    echo "  restart  Restart services"
+    echo "  status   Check service status"
+    echo "  setup    Download/pull the required AI model"
+    echo "  logs     View real-time logs"
+    echo "  ui       Open the chat interface in browser"
+    ;;
+esac
